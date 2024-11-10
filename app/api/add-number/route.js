@@ -11,14 +11,11 @@ export async function POST(req) {
 
         const filePath = path.join(process.cwd(), 'phoneNumbers.json');
 
-        // Read existing phone numbers
         const data = await fs.promises.readFile(filePath, 'utf8');
         const phoneNumbers = JSON.parse(data);
-
-        // Add the new number
+        
         phoneNumbers.push(number);
 
-        // Write updated phone numbers back to the file
         await fs.promises.writeFile(filePath, JSON.stringify(phoneNumbers, null, 2));
 
         return new Response(JSON.stringify({ message: 'Number added successfully' }), { status: 200 });

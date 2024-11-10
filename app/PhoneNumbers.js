@@ -4,9 +4,8 @@ const PhoneNumbers = ({ onLogout }) => {
   const [editPhoneNumber, setEditPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(-1); // Track which number is being edited
+  const [editingIndex, setEditingIndex] = useState(-1); 
 
-  // Load existing phone numbers from the API
   useEffect(() => {
       const fetchPhoneNumbers = async () => {
           const response = await fetch('/api/get-number');
@@ -19,7 +18,6 @@ const PhoneNumbers = ({ onLogout }) => {
       fetchPhoneNumbers();
   }, []);
 
-  // Add a new phone number
   const addPhoneNumber = async () => {
       if (newPhoneNumber.trim()) {
           const response = await fetch('/api/add-number', {
@@ -31,17 +29,16 @@ const PhoneNumbers = ({ onLogout }) => {
           if (response.ok) {
               const updatedNumbers = [...phoneNumbers, newPhoneNumber];
               setPhoneNumbers(updatedNumbers);
-              setNewPhoneNumber(''); // Clear input field
+              setNewPhoneNumber(''); 
           } else {
               const data = await response.json();
-              setError(data.message); // Display error message
+              setError(data.message);
           }
       } else {
           setError('Phone number cannot be empty');
       }
   };
 
-  // Update a phone number
   const updatePhoneNumber = async () => {
       if (editPhoneNumber.trim()) {
           const updatedNumbers = [...phoneNumbers];
@@ -55,23 +52,22 @@ const PhoneNumbers = ({ onLogout }) => {
 
           if (response.ok) {
               setPhoneNumbers(updatedNumbers);
-              setEditPhoneNumber(''); // Clear input field
+              setEditPhoneNumber('');
               setIsEditing(false);
               setEditingIndex(-1);
           } else {
               const data = await response.json();
-              setError(data.message); // Display error message
+              setError(data.message);
           }
       } else {
           setError('Phone number cannot be empty');
       }
   };
 
-  // Delete a phone number
+
   const deletePhoneNumber = async (number) => {
       const updatedNumbers = phoneNumbers.filter((n) => n !== number);
       setPhoneNumbers(updatedNumbers);
-      // Ideally, you would also implement a delete endpoint to handle deletion in the file.
   };
 
   return (
