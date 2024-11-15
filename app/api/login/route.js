@@ -12,7 +12,8 @@ export async function POST(req) {
     const { username, password } = body;
     const adminUsername = 'admin';
     const adminPassword = 'password1234';
-    const adminName = 'Earls Kainan'; 
+    const adminName = 'Earls Kainan';
+    
 
     console.log('Received credentials:', { username, password });
 
@@ -22,4 +23,6 @@ export async function POST(req) {
     } else {
         return new Response(JSON.stringify({ message: 'Invalid username or password' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
+
+
 }

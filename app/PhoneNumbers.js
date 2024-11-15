@@ -1,4 +1,4 @@
-const PhoneNumbers = ({ onLogout }) => {
+  const PhoneNumbers = ({ onLogout }) => {
   const [phoneNumbers, setPhoneNumbers] = useState([]);
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [editPhoneNumber, setEditPhoneNumber] = useState('');

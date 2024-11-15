@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const filePath = path.join(process.cwd(), 'phoneNumbers.json');
+const filePath = path.join(process.cwd(), 'phoneNumbersDB.json');
 
 export async function GET(req) {
     try {
