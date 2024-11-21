@@ -9,7 +9,7 @@ export async function POST(req) {
             return new Response(JSON.stringify({ message: 'Invalid number' }), { status: 400 });
         }
 
-        const filePath = path.join(process.cwd(), 'phoneNumbersDB.json');
+        const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
 
         const data = await fs.promises.readFile(filePath, 'utf8');
         const phoneNumbers = JSON.parse(data);

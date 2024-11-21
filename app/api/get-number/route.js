@@ -1,16 +1,17 @@
+import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const filePath = path.join(process.cwd(), 'phoneNumbersDB.json');
+export async function GET() {
+  const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
+  console.log('File Path:', filePath);  
 
-export async function GET(req) {
-    try {
-        const data = await fs.promises.readFile(filePath, 'utf8');
-        const phoneNumbers = JSON.parse(data);
-
-        return new Response(JSON.stringify(phoneNumbers), { status: 200 });
-    } catch (error) {
-        console.error('Error retrieving phone numbers:', error);
-        return new Response(JSON.stringify({ message: 'Error retrieving numbers' }), { status: 500 });
-    }
+  try {
+    const fileContents = fs.readFileSync(filePath, 'utf8');
+    const phoneNumbers = JSON.parse(fileContents);
+    return NextResponse.json(phoneNumbers);
+  } catch (error) {
+    console.error('Error reading phoneNumbersDB.json:', error.message);
+    return NextResponse.json({ error: 'Failed to read the file' }, { status: 500 });
+  }
 }
