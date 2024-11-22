@@ -30,8 +30,10 @@ export default function PhoneNumbersPage() {
     }, []);
 
     const addPhoneNumber = async () => {
-        if (newPhoneNumber.trim().length === 10) {
-            const completeNumber = `+63${newPhoneNumber}`;
+        let sanitizedNumber = newPhoneNumber.trim().replace(/^0+/, '');
+        if (sanitizedNumber.length === 10) {
+            const completeNumber = `+63${sanitizedNumber}`;
+
             try {
                 const response = await fetch('/api/add-number', {
                     method: 'POST',
@@ -45,6 +47,7 @@ export default function PhoneNumbersPage() {
                     setNewPhoneNumber('');
                     setToastMessage('Phone number has been added');
                     setTimeout(() => setToastMessage(''), 3000);
+                    setWarning(''); 
                 } else {
                     setError('Failed to add phone number');
                 }
@@ -81,6 +84,18 @@ export default function PhoneNumbersPage() {
         router.push('/login');
     };
 
+    const handlePhoneNumberChange = (e) => {
+        const value = e.target.value;
+        if (/^\d*$/.test(value) && value.length <= 11) {
+            setNewPhoneNumber(value);
+        }
+        if (value.length > 11) {
+            setWarning('Phone number cannot be longer than 11 digits.');
+        } else {
+            setWarning('');
+        }
+    };
+
     return (
         <div className="p-10 bg-gray-50 min-h-screen flex justify-center items-center">
             {toastMessage && (
@@ -103,12 +118,7 @@ export default function PhoneNumbersPage() {
                     <input
                         type="text"
                         value={newPhoneNumber}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value) && value.length <= 10) {
-                                setNewPhoneNumber(value);
-                            }
-                        }}
+                        onChange={handlePhoneNumberChange}
                         placeholder="Enter phone number"
                         className="p-2 border border-gray-300 rounded-r flex-grow text-black"
                     />
@@ -133,9 +143,7 @@ export default function PhoneNumbersPage() {
                         {phoneNumbers.map((number, index) => (
                             <tr
                                 key={index}
-                                className={`border-b border-gray-200 ${
-                                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                                } hover:bg-gray-100`}
+                                className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100`}
                             >
                                 <td className="border border-gray-300 px-4 py-2 text-gray-800">{number}</td>
                                 <td className="border border-gray-300 px-4 py-2">
