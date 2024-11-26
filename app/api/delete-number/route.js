@@ -12,13 +12,17 @@ export async function DELETE(req) {
         const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
 
         const data = await fs.promises.readFile(filePath, 'utf8');
-        const phoneNumbers = JSON.parse(data);
+        const jsonData = JSON.parse(data);
 
-        const updatedNumbers = phoneNumbers.filter(n => n !== number);
+        if (!Array.isArray(jsonData.phoneNumbers)) {
+            jsonData.phoneNumbers = [];
+        }
 
-        await fs.promises.writeFile(filePath, JSON.stringify(updatedNumbers, null, 2));
+        jsonData.phoneNumbers = jsonData.phoneNumbers.filter(n => n !== number);
 
-        return new Response(JSON.stringify({ message: 'Number deleted successfully' }), { status: 200 });
+        await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
+
+        return new Response(JSON.stringify({ phoneNumbers: jsonData.phoneNumbers }), { status: 200 });
     } catch (error) {
         console.error('Error deleting number:', error);
         return new Response(JSON.stringify({ message: 'Error deleting number' }), { status: 500 });

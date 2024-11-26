@@ -12,13 +12,17 @@ export async function POST(req) {
         const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
 
         const data = await fs.promises.readFile(filePath, 'utf8');
-        const phoneNumbers = JSON.parse(data);
-        
-        phoneNumbers.push(number);
+        const jsonData = JSON.parse(data);
 
-        await fs.promises.writeFile(filePath, JSON.stringify(phoneNumbers, null, 2));
+        if (!Array.isArray(jsonData.phoneNumbers)) {
+            jsonData.phoneNumbers = [];
+        }
 
-        return new Response(JSON.stringify({ message: 'Number added successfully' }), { status: 200 });
+        jsonData.phoneNumbers.push(number);
+
+        await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
+
+        return new Response(JSON.stringify({ phoneNumbers: jsonData.phoneNumbers }), { status: 200 });
     } catch (error) {
         console.error('Error adding number:', error);
         return new Response(JSON.stringify({ message: 'Error writing file' }), { status: 500 });
