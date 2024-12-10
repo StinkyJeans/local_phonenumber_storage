@@ -264,7 +264,7 @@ export default function PhoneNumbersPage() {
           </button>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-10">
           <h3 className="font-bold text-gray-800">Current Threshold: {currentThreshold || 'Not Set'}</h3>
           <div className="mt-4 flex items-center">
             <input

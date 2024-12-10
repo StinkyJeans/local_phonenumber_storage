@@ -7,6 +7,7 @@ export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = async (e) => {
@@ -33,30 +34,38 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <form onSubmit={handleLogin} className="flex flex-col items-center bg-white p-4 rounded shadow-md">
-                <h2 className="text-xl font-bold text-black">Login</h2>
-                <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
-                    className="p-2 border border-gray-300 rounded mt-2 text-black"
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="p-2 border border-gray-300 rounded mt-2 text-black"
-                />
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+            <form onSubmit={handleLogin} className="w-full max-w-xs bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-2xl text-black font-semibold text-center mb-6">Login</h2>
+                <div className="mb-4">
+                    <label className="text-gray-700 text-sm mb-1">Username</label>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter your username"
+                        className="text-black p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring focus:ring-blue-200"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="text-gray-700 text-sm mb-1">Password</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="text-black p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring focus:ring-blue-200"
+                        autoComplete="current-password"
+                    />
+                </div>
                 <button
                     type="submit"
-                    className="p-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+                    disabled={isLoading}
                 >
-                    Login
+                    {isLoading ? 'Logging in...' : 'Login'}
                 </button>
-                {error && <p className="mt-2 text-red-500">{error}</p>}
+                {error && <p className="mt-4 text-center text-red-500">{error}</p>}
             </form>
         </div>
     );
