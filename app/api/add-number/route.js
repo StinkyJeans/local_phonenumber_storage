@@ -3,10 +3,10 @@ import path from 'path';
 
 export async function POST(req) {
     try {
-        const { number } = await req.json();
+        const { number, name, role } = await req.json();
 
-        if (!number || typeof number !== 'string') {
-            return new Response(JSON.stringify({ message: 'Invalid number' }), { status: 400 });
+        if (!number || typeof number !== 'string' || !name || typeof name !== 'string' || !role || typeof role !== 'string') {
+            return new Response(JSON.stringify({ message: 'Invalid input' }), { status: 400 });
         }
 
         const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
@@ -18,7 +18,7 @@ export async function POST(req) {
             jsonData.phoneNumbers = [];
         }
 
-        jsonData.phoneNumbers.push(number);
+        jsonData.phoneNumbers.push({ number, name, role });
 
         await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
 

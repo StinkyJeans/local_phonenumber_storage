@@ -1,6 +1,14 @@
 {
   "phoneNumbers": [
-    "+639385405353",
-    "+639630363102"
+    {
+      "number": "+639385405353",
+      "name": "John Doe",
+      "role": "Manager"
+    },
+    {
+      "number": "+639682055758",
+      "name": "Clark",
+      "role": "Head Chef"
+    }
   ]
 }

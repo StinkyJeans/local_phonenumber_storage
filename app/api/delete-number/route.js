@@ -18,7 +18,7 @@ export async function DELETE(req) {
             jsonData.phoneNumbers = [];
         }
 
-        jsonData.phoneNumbers = jsonData.phoneNumbers.filter(n => n !== number);
+        jsonData.phoneNumbers = jsonData.phoneNumbers.filter(phone => phone.number !== number);
 
         await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
 
