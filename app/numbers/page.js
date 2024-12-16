@@ -9,6 +9,7 @@ export default function PhoneNumbersPage() {
   const [newRole, setNewRole] = useState('');
   const [error, setError] = useState('');
   const [warning, setWarning] = useState('');
+  const [valueWarning, setValueWarning] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [adminName, setAdminName] = useState('');
   const [threshold, setThreshold] = useState('');
@@ -57,7 +58,7 @@ export default function PhoneNumbersPage() {
         const response = await fetch('/api/get-threshold');
         if (response.ok) {
           const data = await response.json();
-          setCurrentThreshold(data.threshold); // Update current threshold
+          setCurrentThreshold(data.threshold); 
         } else {
           setError('Failed to fetch threshold');
         }
@@ -80,6 +81,21 @@ export default function PhoneNumbersPage() {
     let sanitizedNumber = newPhoneNumber.trim().replace(/^0+/, '');
     if (sanitizedNumber.length === 10) {
       const completeNumber = `+63${sanitizedNumber}`;
+
+      if (!newName) {
+        setError('Please input name');
+        return;
+      }
+
+      if (!newRole) {
+        setError('Please input role');
+        return;
+      }
+
+      if (!newPhoneNumber) {
+        setError('Please input phone number');
+        return;
+      }
 
       try {
         const response = await fetch('/api/add-number', {
@@ -150,33 +166,58 @@ export default function PhoneNumbersPage() {
   };
 
   const handleThresholdChange = (e) => {
-    setThreshold(e.target.value);
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setThreshold(value);
+      setThresholdError('');
+    } else {
+      setThresholdError('Threshold must be a number.');
+    }
   };
 
   const handleSetThreshold = async () => {
     if (!threshold) {
-      setWarning('Please enter a valid threshold value');
+      setValueWarning('Please enter a valid threshold value');
       return;
     }
-
+  
     try {
       const response = await fetch('/api/set-threshold', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ threshold }),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
-        setCurrentThreshold(data.threshold); 
+        setCurrentThreshold(data.threshold);
         setToastMessage(`Threshold set to ${threshold}`);
         setTimeout(() => setToastMessage(''), 3000);
-        setWarning('');
+        setValueWarning('');
+        
+        
+        if (threshold === currentThreshold) {
+          setValueWarning('');
+        }
       } else {
         setError('Failed to set threshold');
       }
     } catch (error) {
       setError('Error setting threshold');
+    }
+  };
+  
+  const handleRoleChange = (e) => {
+    const value = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(value)) {
+      setNewRole(value);
+    }
+  };
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(value)) {
+      setNewName(value);
     }
   };
 
@@ -210,30 +251,31 @@ export default function PhoneNumbersPage() {
         </div>
 
         <div className="mt-6 flex items-center">
-        <input
+          <input
             type="text"
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
+            onChange={handleNameChange}
             placeholder="Enter Name"
             className="p-2 border border-gray-300 rounded-l text-black ml-2"
           />
           <input
             type="text"
             value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
+            onChange={handleRoleChange}
             placeholder="Enter Role"
             className="p-2 border border-gray-300 rounded-r text-black ml-2"
           />
-          
           <button
             onClick={addPhoneNumber}
             className="ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            disabled={!newName || !newRole || !newPhoneNumber}
+            hover={!newName || !newRole || !newPhoneNumber}
           >
-            Add
+           Add
           </button>
         </div>
         <div className="mt-4 ml-2">
-        <span className="p-3 bg-gray-200 border border-gray-300 rounded-l text-black">+63</span>
+          <span className="p-3 bg-gray-200 border border-gray-300 rounded-l text-black">+63</span>
           <input
             type="text"
             value={newPhoneNumber}
@@ -262,7 +304,7 @@ export default function PhoneNumbersPage() {
                 <td className="border border-gray-300 px-4 py-2 text-black">
                   <button
                     onClick={() => deletePhoneNumber(phone.number)}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-3 py-1 text-red-500"
                   >
                     Delete
                   </button>
@@ -279,6 +321,7 @@ export default function PhoneNumbersPage() {
             View Message Logs
           </button>
         </div>
+
         <div className="mt-10">
           {currentThreshold && (
             <div className="text-md text-gray-600">
@@ -287,26 +330,26 @@ export default function PhoneNumbersPage() {
           )}
         </div>
 
-        <div className="mt-2">
-          <div className="flex items-center">
-            <input
-              type="text"
-              value={threshold}
-              onChange={handleThresholdChange}
-              placeholder="Enter Threshold Value"
-              className="p-2 border border-gray-300 rounded-l text-black"
-            />
-            <button
-              onClick={handleSetThreshold}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Set Threshold
-            </button>
-          </div>
-          {thresholdError && <p className="mt-2 text-red-500">{thresholdError}</p>}
+        <div className="mt-2 flex justify-between items-center">
+          <input
+            type="text"
+            value={threshold}
+            onChange={handleThresholdChange}
+            placeholder="Enter Threshold Value"
+            className="p-2 border border-gray-300 rounded-l text-black"
+            
+          />
+          <button
+            onClick={handleSetThreshold}
+            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Set Threshold
+          </button>
         </div>
-
-        
+        {valueWarning && <p className="mt-2 text-red-500">{valueWarning}</p>}
+        <div>
+        {thresholdError && <p className="mt-2 text-red-500">{thresholdError}</p>}
+        </div>
       </div>
     </div>
   );

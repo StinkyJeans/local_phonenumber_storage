@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
+import * as XLSX from 'xlsx'; // Import the xlsx library
 
 const MessageLogs = () => {
   const [messages, setMessages] = useState([]);
@@ -22,16 +24,15 @@ const MessageLogs = () => {
         setLoading(false);
       }
     };
-  
+
     fetchMessages();
-  
+
     const interval = setInterval(() => {
       fetchMessages();
     }, 10000);
-  
-    return () => clearInterval(interval); 
+
+    return () => clearInterval(interval);
   }, []);
-  
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(messages.length / messagesPerPage)) {
@@ -49,6 +50,22 @@ const MessageLogs = () => {
     router.push('/numbers');
   };
 
+  const handleExportToExcel = () => {
+    // Filter and format the data
+    const filteredMessages = messages.map((message) => ({
+      FROM: message.from,
+      TO: message.to,
+      BODY: message.body,
+      'DATE SENT': new Date(message.dateSent).toLocaleString(),
+    }));
+
+    // Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(filteredMessages);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Messages');
+    XLSX.writeFile(workbook, 'message_logs.xlsx');
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -61,12 +78,21 @@ const MessageLogs = () => {
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Message Logs</h1>
-          <button
-            onClick={numbersPage}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
-          >
-            Back
-          </button>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleExportToExcel}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 flex items-center"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+              Export to Excel
+            </button>
+            <button
+              onClick={numbersPage}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
+            >
+              Back
+            </button>
+          </div>
         </div>
         <h2 className="text-gray-900">This shows your message logs</h2>
         <div className="overflow-x-auto">
