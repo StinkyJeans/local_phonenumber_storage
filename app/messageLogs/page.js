@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
-import * as XLSX from 'xlsx'; // Import the xlsx library
+import * as XLSX from 'xlsx';
 
 const MessageLogs = () => {
   const [messages, setMessages] = useState([]);
@@ -51,7 +51,6 @@ const MessageLogs = () => {
   };
 
   const handleExportToExcel = () => {
-    // Filter and format the data
     const filteredMessages = messages.map((message) => ({
       FROM: message.from,
       TO: message.to,
@@ -59,7 +58,6 @@ const MessageLogs = () => {
       'DATE SENT': new Date(message.dateSent).toLocaleString(),
     }));
 
-    // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(filteredMessages);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Messages');

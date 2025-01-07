@@ -1,4 +1,3 @@
-// app/api/set-threshold/route.js
 import fs from 'fs';
 import path from 'path';
 

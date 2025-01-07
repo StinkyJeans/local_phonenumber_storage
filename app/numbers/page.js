@@ -355,7 +355,7 @@ export default function PhoneNumbersPage() {
         {warning && <p className="mt-2 text-red-500">{warning}</p>}
 
         <div className="mt-2 text-black">
-          <p>Upload Phone Numbers</p>
+          <p>Upload Phone Number Excel File</p>
          <input 
            className='cursor-pointer'
            type="file"
