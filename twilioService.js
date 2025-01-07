@@ -7,7 +7,7 @@ const client = twilio(accountSid, authToken);
 
 async function getMessageLogs() {
     try {
-      const messages = await client.messages.list({ limit: 50 });
+      const messages = await client.messages.list({ limit: 100 });
       messages.sort((a, b) => new Date(b.dateSent) - new Date(a.dateSent));
       return messages;
     } catch (error) {

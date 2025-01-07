@@ -10,21 +10,31 @@ export async function DELETE(req) {
         }
 
         const filePath = path.join(process.cwd(), 'data', 'phoneNumbersDB.json');
-
+        const archivedFilePath = path.join(process.cwd(), 'data', 'archivedPhoneNumberDB.json');
         const data = await fs.promises.readFile(filePath, 'utf8');
         const jsonData = JSON.parse(data);
 
         if (!Array.isArray(jsonData.phoneNumbers)) {
             jsonData.phoneNumbers = [];
         }
+        const phoneIndex = jsonData.phoneNumbers.findIndex(phone => phone.number === number);
+        if (phoneIndex === -1) {
+            return new Response(JSON.stringify({ message: 'Phone number not found' }), { status: 404 });
+        }
 
-        jsonData.phoneNumbers = jsonData.phoneNumbers.filter(phone => phone.number !== number);
+        const archivedData = await fs.promises.readFile(archivedFilePath, 'utf8');
+        const archivedJsonData = JSON.parse(archivedData) || { phoneNumbers: [] };
+        archivedJsonData.phoneNumbers.push(jsonData.phoneNumbers[phoneIndex]);
+        jsonData.phoneNumbers.splice(phoneIndex, 1);
+
 
         await fs.promises.writeFile(filePath, JSON.stringify(jsonData, null, 2));
 
+        await fs.promises.writeFile(archivedFilePath, JSON.stringify(archivedJsonData, null, 2));
+
         return new Response(JSON.stringify({ phoneNumbers: jsonData.phoneNumbers }), { status: 200 });
     } catch (error) {
-        console.error('Error deleting number:', error);
-        return new Response(JSON.stringify({ message: 'Error deleting number' }), { status: 500 });
+        console.error('Error archiving phone number:', error);
+        return new Response(JSON.stringify({ message: 'Error archiving phone number' }), { status: 500 });
     }
 }

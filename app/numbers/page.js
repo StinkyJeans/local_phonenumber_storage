@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import * as XLSX from 'xlsx';
 
 export default function PhoneNumbersPage() {
   const [phoneNumbers, setPhoneNumbers] = useState([]);
@@ -16,7 +17,11 @@ export default function PhoneNumbersPage() {
   const [thresholdError, setThresholdError] = useState('');
   const [currentThreshold, setCurrentThreshold] = useState('');
   const router = useRouter();
+  const [success,setSuccess] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; 
 
+  
   useEffect(() => {
     const fetchPhoneNumbers = async () => {
       try {
@@ -31,6 +36,7 @@ export default function PhoneNumbersPage() {
         setError('Error fetching phone numbers');
       }
     };
+
 
     const fetchAdminName = async () => {
       try {
@@ -73,11 +79,6 @@ export default function PhoneNumbersPage() {
   }, []);
 
   const addPhoneNumber = async () => {
-    if (phoneNumbers.length >= 5) {
-      setWarning('Max limit of phone numbers added has been reached!');
-      return;
-    }
-
     let sanitizedNumber = newPhoneNumber.trim().replace(/^0+/, '');
     if (sanitizedNumber.length === 10) {
       const completeNumber = `+63${sanitizedNumber}`;
@@ -124,26 +125,79 @@ export default function PhoneNumbersPage() {
     }
   };
 
-  const deletePhoneNumber = async (number) => {
-    try {
-      const response = await fetch('/api/delete-number', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number }),
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        setPhoneNumbers(data.phoneNumbers);
-        setToastMessage('Phone number has been deleted');
-        setTimeout(() => setToastMessage(''), 3000);
-      } else {
-        setError('Failed to delete phone number');
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.xlsx')) {
+      try {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const data = e.target.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(sheet);
+          const phoneNumbers = jsonData.map(row => {
+            const rawNumber = row.PhoneNumber || '';
+            const formattedNumber = rawNumber.startsWith('0')
+              ? '+63' + rawNumber.slice(1)
+              : rawNumber;
+  
+            return {
+              name: row.Name,
+              role: row.Role,
+              number: formattedNumber,
+            };
+          });
+
+          const response = await fetch('/api/upload-phone-number', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phoneNumbers }),
+          });
+  
+          if (response.ok) {
+            setSuccess('Phone numbers uploaded successfully!');
+            setError('');
+            window.location.reload()
+          } else {
+            setError('Failed to upload phone numbers');
+            setSuccess('');
+          }
+        };
+        reader.readAsBinaryString(file);
+      } catch (error) {
+        setError('Error reading Excel file');
+        setSuccess('');
       }
-    } catch (error) {
-      setError('Error deleting phone number');
+    } else {
+      setError('Please upload a valid Excel (.xlsx) file');
+      setSuccess('');
     }
   };
+
+  const deletePhoneNumber = async (number) => {
+    try {
+        const response = await fetch('/api/delete-number', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setPhoneNumbers(data.phoneNumbers);
+            setToastMessage('Phone number has been archived');
+            setTimeout(() => setToastMessage(''), 3000);
+        } else {
+            setError('Failed to archive phone number');
+        }
+    } catch (error) {
+        setError('Error archiving phone number');
+    }
+};
 
   const handleLogout = () => {
     router.push('/login');
@@ -151,6 +205,10 @@ export default function PhoneNumbersPage() {
 
   const messageLogs = () => {
     router.push('/messageLogs');
+  };
+
+  const archived = () => {
+    router.push('/archived-numbers');
   };
 
   const handlePhoneNumberChange = (e) => {
@@ -220,6 +278,17 @@ export default function PhoneNumbersPage() {
       setNewName(value);
     }
   };
+  const totalPages = Math.ceil(phoneNumbers.length / itemsPerPage);
+
+  const paginatedPhoneNumbers = phoneNumbers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
 
   return (
     <div className="p-10 bg-gray-50 min-h-screen flex justify-center items-center">
@@ -231,7 +300,7 @@ export default function PhoneNumbersPage() {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-lg">
+      <div className="bg-white shadow-md rounded-lg p-6 w-fullmax-w-lg">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">Manage Phone Numbers</h2>
           <button
@@ -269,9 +338,8 @@ export default function PhoneNumbersPage() {
             onClick={addPhoneNumber}
             className="ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             disabled={!newName || !newRole || !newPhoneNumber}
-            hover={!newName || !newRole || !newPhoneNumber}
           >
-           Add
+            Add
           </button>
         </div>
         <div className="mt-4 ml-2">
@@ -286,7 +354,19 @@ export default function PhoneNumbersPage() {
         </div>
         {warning && <p className="mt-2 text-red-500">{warning}</p>}
 
-        <table className="mt-6 w-full border-collapse border border-gray-200 text-sm">
+        <div className="mt-2 text-black">
+          <p>Upload Phone Numbers</p>
+         <input 
+           className='cursor-pointer'
+           type="file"
+           accept=".xlsx"
+           onChange={handleFileUpload}
+         />
+         {success && <p className="text-green-500">{success}</p>}
+         {error && <p className="text-red-500">{error}</p>}
+        </div>
+
+        <table className="mt-4 w-full border-collapse border border-gray-200 text-sm">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 px-4 py-2 text-left text-gray-800">Name</th>
@@ -296,7 +376,7 @@ export default function PhoneNumbersPage() {
             </tr>
           </thead>
           <tbody>
-            {phoneNumbers.map((phone) => (
+            {paginatedPhoneNumbers.map((phone) => (
               <tr key={phone.number} className="border-b">
                 <td className="border border-gray-300 px-4 py-2 text-black">{phone.name}</td>
                 <td className="border border-gray-300 px-4 py-2 text-black">{phone.role}</td>
@@ -306,19 +386,43 @@ export default function PhoneNumbersPage() {
                     onClick={() => deletePhoneNumber(phone.number)}
                     className="px-3 py-1 text-red-500"
                   >
-                    Delete
+                    Archive
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="mt-6">
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="px-4 py-2 bg-gray-300 text-black rounded-l hover:bg-gray-400"
+            disabled={currentPage <= 1}
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-black">{currentPage} of {totalPages}</span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="px-4 py-2 bg-gray-300 text-black rounded-r hover:bg-gray-400"
+            disabled={currentPage >= totalPages}
+          >
+            Next
+          </button>
+        </div>
+
+        <div className="mt-2 flex justify-between items-center">
           <button
             onClick={messageLogs}
             className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
             View Message Logs
+          </button>
+        <button
+            onClick={archived}
+            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          >
+            View Archived Phone Numbers
           </button>
         </div>
 
