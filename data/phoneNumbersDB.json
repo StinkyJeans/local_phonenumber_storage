@@ -1,9 +1,3 @@
 {
-  "phoneNumbers": [
-    {
-      "number": "+639306807050",
-      "name": "John",
-      "role": "Manager"
-    }
-  ]
+  "phoneNumbers": []
 }

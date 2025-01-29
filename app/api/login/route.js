@@ -12,6 +12,7 @@ export async function POST(req) {
     const adminPassword = 'password1234';
     const adminName = 'Earls Kainan';
   
+  
     console.log('Received credentials:', { username, password });
   
     if (username === adminUsername && password === adminPassword) {

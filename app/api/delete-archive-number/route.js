@@ -24,7 +24,7 @@ export async function DELETE(req) {
 
         return new Response(JSON.stringify({ phoneNumbers: jsonData.phoneNumbers }), { status: 200 });
     } catch (error) {
-        console.error('Error deleting number:', error);
-        return new Response(JSON.stringify({ message: 'Error deleting number' }), { status: 500 });
+        console.error('Error Archiving number:', error);
+        return new Response(JSON.stringify({ message: 'Error Archiving number' }), { status: 500 });
     }
 }

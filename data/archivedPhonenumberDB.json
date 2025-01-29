@@ -1,3 +1,19 @@
 {
-  "phoneNumbers": []
+  "phoneNumbers": [
+    {
+      "number": "+639306807050",
+      "name": "John",
+      "role": "Manager"
+    },
+    {
+      "name": "Earl",
+      "role": "Manager",
+      "number": "+639630363102"
+    },
+    {
+      "name": "Turla",
+      "role": "Manager",
+      "number": "+639994197741"
+    }
+  ]
 }
